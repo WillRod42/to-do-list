@@ -3,7 +3,7 @@ function ToDoList() {
 }
 
 ToDoList.prototype.addTask = function(taskDesc) {
-  if (!this.tasks[taskDesc]) {
+  if (!this.tasks[taskDesc] && taskDesc !== "") {
     this.tasks[taskDesc] = new Task(taskDesc);
     return true;
   } else {
@@ -20,32 +20,30 @@ ToDoList.prototype.removeTask = function(taskDesc) {
   }
 }
 
-ToDoList.prototype.finishTask = function(taskDesc) {
-  if (this.tasks[taskDesc]) {
-    this.tasks[taskDesc].finished = true;
-    return true;
-  } else {
-    return false;
-  }
-}
-
 function Task(taskDesc) {
   this.task = taskDesc;
-  this.finished = false;
 }
 
-function 
+function finishTaskUI() {
+  $(this).prev().addClass("finished");
+  $(this).remove();
+}
 
-function createTaskUI(taskDesc) {
+function removeTaskUI(event) {
+  let taskDesc = $(this).siblings().first().text();
+  event.data.list.removeTask(taskDesc);
+  $(this).parent().remove();
+}
+
+function createTaskUI(taskDesc, toDoList) {
   let task = $("<li></li>");
-  task.text(taskDesc);
+  task.append("<span>" + taskDesc + "</span>");
 
   let finishBtn = $("<button class='finish btn btn-success'>finish</button>");
   let removeBtn = $("<button class='remove btn btn-danger'>remove</button>");
 
-  /*
-    Add click methods here
-  */
+  finishBtn.click(finishTaskUI);
+  removeBtn.click({list: toDoList}, removeTaskUI);
 
   task.append(finishBtn);
   task.append(removeBtn);
@@ -59,7 +57,7 @@ $(document).ready(function() {
   $("form").submit(function(e) {
     e.preventDefault();
     if (toDo.addTask($("#task").val())) {
-      $("#to-do-list ul").append(createTaskUI($("#task").val()));
+      $("#to-do-list ul").append(createTaskUI($("#task").val(), toDo));
     }
   });
 });
